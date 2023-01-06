@@ -12,11 +12,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using seminar_API.Data;
+using seminar_API.Repositories;
+using seminar_API.Repositories.IRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace seminar_API
 {
@@ -32,37 +35,41 @@ namespace seminar_API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
+            // services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
 
             services.AddDbContext<AppDbContext>(options =>
                                                 options.UseSqlServer(
                                                     Configuration.GetConnectionString("DefaultConnection")
                                                 ));
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(jwt =>
-            {
-                var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
+            services.AddScoped<ILocationRepository, LocationRepository>();
 
-                jwt.SaveToken = true;
-                jwt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    RequireExpirationTime = false,
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true
-                };
-            });
+            // services.AddAuthentication(options =>
+            // {
+            //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //     options.DefaultScheme = options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //     options.DefaultChallengeScheme = options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            // })
+            // .AddJwtBearer(jwt =>
+            // {
+            //     var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<AppDbContext>();
+            //     jwt.SaveToken = true;
+            //     jwt.TokenValidationParameters = new TokenValidationParameters
+            //     {
+            //         ValidateIssuerSigningKey = true,
+            //         IssuerSigningKey = new SymmetricSecurityKey(key),
+            //         RequireExpirationTime = false,
+            //         ValidateIssuer = false,
+            //         ValidateAudience = false,
+            //         ValidateLifetime = true
+            //     };
+            // });
+
+            // services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            // .AddEntityFrameworkStores<AppDbContext>();
+
+            services.AddAutoMapper(typeof(MappingConfig));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -85,7 +92,7 @@ namespace seminar_API
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            // app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
