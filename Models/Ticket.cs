@@ -10,11 +10,12 @@ namespace seminar_API.Models
         [Required]
         [NotNull]
         public Guid TicketId { get; init; }
-        public string Type { get; init; }
-        public decimal Price { get; set; }
+        public string Type { get; set; }
+        public uint Price { get; set; }
         public DateTimeOffset CreatedDate { get; init; }
         public DateTimeOffset ModifiedDate { get; set; }
 
+        public Guid LocationID { get; set; }
         public Location Location { get; set; }
     }
 }

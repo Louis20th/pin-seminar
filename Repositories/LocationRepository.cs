@@ -31,7 +31,7 @@ namespace seminar_API.Repositories
 
         public async Task AddLocationAsync(Location location)
         {
-            await _db.AddAsync(location);
+            await _db.Locations.AddAsync(location);
             await _db.SaveChangesAsync();
         }
 
@@ -43,6 +43,8 @@ namespace seminar_API.Repositories
 
         async Task ILocationRepository.RemoveLocationAsync(Location location)
         {
+            var relatedTickets = _db.Tickets.Where(t => t.LocationID == location.LocationId).ToList();
+            _db.Tickets.RemoveRange(relatedTickets);
             _db.Locations.Remove(location);
             await _db.SaveChangesAsync();
         }

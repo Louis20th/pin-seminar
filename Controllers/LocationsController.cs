@@ -31,20 +31,21 @@ namespace seminar_API.Controllers
             return Ok(items);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "Get Location")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<LocationDTO>> GetLocationAsync(Guid id)
         {
             var item = await _dbLocation.GetLocationAsync(id);
-            if (item != null) return Ok(item);
-            return NotFound();
+            if (item != null)
+                return Ok(item);
+            return NotFound(id);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)] //TODO
         public async Task<ActionResult<LocationDTO>> AddLocationAsync([FromBody] CreateLocationDTO newLocation)
         {
             Location location = new()
@@ -56,7 +57,9 @@ namespace seminar_API.Controllers
             };
 
             await _dbLocation.AddLocationAsync(location);
-            return Ok();
+
+            var result = _mapper.Map<LocationDTO>(location);
+            return CreatedAtRoute("Get Location", new { id = result.LocationID }, result);
         }
 
         [HttpDelete("{id}")]
@@ -64,10 +67,10 @@ namespace seminar_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteLocation(Guid id)
         {
-            var item = await _dbLocation.GetLocationAsync(id);
-            if (item == null) return NotFound();
+            Location item = await _dbLocation.GetLocationAsync(id);
             await _dbLocation.RemoveLocationAsync(item);
-            return NoContent();
+
+            return Ok(id);
         }
 
         [HttpPut("{id}")]
@@ -76,9 +79,12 @@ namespace seminar_API.Controllers
         public async Task<ActionResult<UpdateLocationDto>> UpdateLocationAsync([FromBody] UpdateLocationDto location, Guid id)
         {
             var item = await _dbLocation.GetLocationAsync(id);
-            if (item == null) return NotFound();
+            if (item == null)
+                return NotFound(id);
+
             item.Name = location.Name;
             item.Coordinates = location.Coordinates;
+
             await _dbLocation.UpdateLocationAsync(item);
             return NoContent();
         }

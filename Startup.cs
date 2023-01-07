@@ -43,6 +43,7 @@ namespace seminar_API
                                                 ));
 
             services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<ITicketRepository, TicketRepository>();
 
             // services.AddAuthentication(options =>
             // {

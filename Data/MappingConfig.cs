@@ -10,6 +10,7 @@ namespace seminar_API.Data
         public MappingConfig()
         {
             CreateMap<Location, LocationDTO>().ReverseMap();
+            CreateMap<Ticket, TicketDTO>().ReverseMap();
         }
     }
 }
