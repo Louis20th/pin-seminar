@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -16,43 +17,72 @@ namespace seminar_API.Controllers
     {
         private readonly ITicketRepository _dbTickets;
         private readonly IMapper _mapper;
+        private ApiResponse _response;
         public TicketsController(ITicketRepository dbTickets, IMapper mapper)
         {
             _dbTickets = dbTickets;
             _mapper = mapper;
+            _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<TicketDTO>>> GetTicketsAsync()
         {
-            var items = await _dbTickets.GetAllAsync();
-            var result = _mapper.Map<List<TicketDTO>>(items);
+            _response.Success = false;
+            try
+            {
+                var items = await _dbTickets.GetAllAsync();
+                var result = _mapper.Map<List<TicketDTO>>(items);
 
-            if (result == null)
+                _response.Result = result;
+                _response.StatusCode = HttpStatusCode.OK;
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.Message);
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+            if (!_response.Success)
                 return NoContent();
 
-            return Ok(result);
+            return Ok(_response);
         }
 
         [HttpGet("{id}", Name = "Get Ticket")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TicketDTO>> GetOneTicketAsync(Guid id)
         {
-            var item = _mapper.Map<TicketDTO>(await _dbTickets.GetOneAsync(id));
-            if (item == null)
-                return NotFound();
-
-            return Ok(item);
+            _response.Success = false;
+            try
+            {
+                _response.Result = _mapper.Map<TicketDTO>(await _dbTickets.GetOneAsync(id));
+                _response.Success = (_response.Result != null);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.Message);
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            if (!_response.Success)
+                return NotFound(_response);
+            return Ok(_response);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TicketDTO>> AddTicketAsync([FromBody] CreateTicketDTO newTicket)
         {
+            _response.Success = false;
+
             Ticket ticket = new()
             {
                 TicketId = Guid.NewGuid(),
@@ -66,27 +96,48 @@ namespace seminar_API.Controllers
             try
             {
                 await _dbTickets.AddAsync(ticket);
-                var createdDto = _mapper.Map<TicketDTO>(ticket);
+                _response.Result = _mapper.Map<TicketDTO>(ticket);
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.Success = true;
 
-                return CreatedAtRoute("Get Ticket", new { id = ticket.TicketId }, createdDto);
+                return CreatedAtRoute("Get Ticket", new { id = ticket.TicketId }, _response);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                _response.ErrorMessages.Add(ex.Message);
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
         }
 
         [HttpGet("location/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<TicketDTO>>> GetTicketsByLocationId(Guid id)
         {
-            var items = await _dbTickets.GetByLocationId(id);
-            var result = _mapper.Map<List<TicketDTO>>(items);
-            if (result.Count == 0)
-                return NotFound();
+            _response.Success = false;
 
-            return Ok(result);
+            try
+            {
+                var items = await _dbTickets.GetByLocationId(id);
+                _response.Result = _mapper.Map<List<TicketDTO>>(items);
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Success = (items.Count != 0);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.Message);
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+            if (!_response.Success)
+            {
+                _response.StatusCode = HttpStatusCode.NotFound;
+                return NotFound(_response);
+            }
+
+            return Ok(_response);
         }
     }
 }
