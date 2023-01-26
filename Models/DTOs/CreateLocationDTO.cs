@@ -9,6 +9,7 @@ namespace seminar_API.Models.DTOs
         [Required]
         public string Name { get; init; }
         [Required]
-        public string Coordinates { get; init; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
     }
 }

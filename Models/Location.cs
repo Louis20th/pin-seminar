@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using Geolocation;
+using Microsoft.IdentityModel.Protocols;
+using seminar_API.Models.Forecast;
 
 namespace seminar_API.Models
 {
@@ -14,7 +18,8 @@ namespace seminar_API.Models
         [MaxLength(50)]
         public string Name { get; set; }
         [NotNull]
-        public string Coordinates { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
         public DateTimeOffset CreatedDate { get; init; }
         public DateTimeOffset ModifiedDate { get; set; }
 

@@ -14,7 +14,6 @@ namespace seminar_API.Models
 
         public ApiResponse()
         {
-            Success = false;
             ErrorMessages = new();
         }
     }

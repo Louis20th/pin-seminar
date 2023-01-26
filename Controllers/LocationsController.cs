@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using seminar_API.Models;
@@ -11,6 +13,7 @@ using seminar_API.Repositories.IRepository;
 
 namespace seminar_API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")] // api/location
     [ApiController]
     public class LocationsController : ControllerBase
@@ -96,7 +99,8 @@ namespace seminar_API.Controllers
                 {
                     LocationId = Guid.NewGuid(),
                     Name = newLocation.Name,
-                    Coordinates = newLocation.Coordinates,
+                    latitude = newLocation.latitude,
+                    longitude = newLocation.longitude,
                     CreatedDate = DateTimeOffset.UtcNow
                 };
                 await _dbLocation.AddLocationAsync(location);
@@ -118,11 +122,15 @@ namespace seminar_API.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteLocation(Guid id)
         {
             try
             {
                 Location item = await _dbLocation.GetLocationAsync(id);
+                if (item == null)
+                    return NotFound();
+
                 await _dbLocation.RemoveLocationAsync(item);
                 return NoContent();
             }
@@ -138,6 +146,7 @@ namespace seminar_API.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<UpdateLocationDto>> UpdateLocationAsync([FromBody] UpdateLocationDto location, Guid id)
         {
             var item = await _dbLocation.GetLocationAsync(id);
@@ -151,7 +160,8 @@ namespace seminar_API.Controllers
             }
 
             item.Name = location.Name;
-            item.Coordinates = location.Coordinates;
+            item.latitude = location.latitude;
+            item.longitude = location.longitude;
             try
             {
                 await _dbLocation.UpdateLocationAsync(item);

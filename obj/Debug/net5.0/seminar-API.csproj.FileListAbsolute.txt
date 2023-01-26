@@ -61,3 +61,10 @@ C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\runtimes\win\lib\netstandard2.0\
 C:\dev\PIN\seminar\seminar-API\obj\Debug\net5.0\staticwebassets\seminar-API.StaticWebAssets.xml
 C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Humanizer.dll
 C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\AutoMapper.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Microsoft.Extensions.Options.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Microsoft.Extensions.Primitives.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\System.Runtime.CompilerServices.Unsafe.dll
+C:\dev\PIN\seminar\seminar-API\bin\Debug\net5.0\Geolocation.dll

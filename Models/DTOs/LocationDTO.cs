@@ -6,7 +6,7 @@ namespace seminar_API.Models.DTOs
     {
         public Guid LocationID { get; init; }
         public string Name { get; init; }
-        public string Coordinates { get; init; }
-        public DateTimeOffset CreatedDate { get; init; }
+        public decimal latitude { get; set; }
+        public decimal longitude { get; set; }
     }
 }

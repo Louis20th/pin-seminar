@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using seminar_API.Models;
@@ -11,6 +13,7 @@ using seminar_API.Repositories.IRepository;
 
 namespace seminar_API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")] // api/tickets
     [ApiController]
     public class TicketsController : ControllerBase
@@ -138,6 +141,50 @@ namespace seminar_API.Controllers
             }
 
             return Ok(_response);
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RemoveTicketAsync(Guid id)
+        {
+            try
+            {
+                var item = await _dbTickets.GetOneAsync(id);
+                await _dbTickets.RemoveAsync(item);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.Message);
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                _response.Success = false;
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RemoveOneAsync(Guid id)
+        {
+            try
+            {
+                var item = await _dbTickets.GetOneAsync(id);
+                if (item == null)
+                    return NotFound();
+
+                await _dbTickets.RemoveAsync(item);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.Message);
+                _response.Success = false;
+                _response.StatusCode = HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            return NoContent();
         }
     }
 }
